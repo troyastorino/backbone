@@ -326,6 +326,15 @@
       return (this.sync || Backbone.sync).call(this, method, this, options);
     },
 
+    // Set a hash of model attributes, and sync only the changed
+    // attributes to the server. Calls `set` with new attributes if
+    // server returns 
+    patch: function(key, value, options) {
+      options = _.extend({}, options, {patch: true});
+
+      return this.save(key, value, options);
+    },
+
     // Destroy this model on the server if it was already persisted.
     // Optimistically removes the model from its collection, if it has one.
     // If `wait: true` is passed, waits for the server to respond before removal.
