@@ -320,7 +320,9 @@
         }
       };
       options.error = Backbone.wrapError(options.error, model, options);
-      var method = this.isNew() ? 'create' : 'update';
+      var method = this.isNew() ? 'create' :
+        options.patch ? 'patch' : 'update';
+      if (options.patch) options.attrs = attrs;
       return (this.sync || Backbone.sync).call(this, method, this, options);
     },
 
@@ -1126,7 +1128,8 @@
     'create': 'POST',
     'update': 'PUT',
     'delete': 'DELETE',
-    'read':   'GET'
+    'read':   'GET',
+    'patch':  'PATCH'
   };
 
   // Override this function to change the manner in which Backbone persists
@@ -1156,9 +1159,14 @@
     }
 
     // Ensure that we have the appropriate request data.
-    if (!options.data && model && (method == 'create' || method == 'update')) {
+    if (!options.data && model) {
       params.contentType = 'application/json';
-      params.data = JSON.stringify(model.toJSON());
+      if (method == 'create' || method == 'update') {
+        params.data = JSON.stringify(model.toJSON());
+      } else if (method == 'patch') {
+        params.data = JSON.stringify(
+          _.extend({}, options.attrs, {id: this.model.get("id")}));
+      }
     }
 
     // For older servers, emulate JSON by encoding the request into an HTML-form.
