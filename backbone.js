@@ -330,9 +330,18 @@
     // attributes to the server. Calls `set` with new attributes if
     // server returns 
     patch: function(key, value, options) {
+      var attrs;
+      if (_.isObject(key) || key == null) {
+        attrs = key;
+        options = value;
+      } else {
+        attrs = {};
+        attrs[key] = value;
+      }
+
       options = _.extend({}, options, {patch: true});
 
-      return this.save(key, value, options);
+      return this.save(attrs, options);
     },
 
     // Destroy this model on the server if it was already persisted.
